@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class AMainCharacter : public ACharacterBase
 {
 	GENERATED_BODY()
