@@ -9,7 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 class ACharacterBase;
-
+class ACameraCenterActor;
 struct FInputActionValue;
 
 /**
@@ -37,8 +37,10 @@ public:
 	TObjectPtr<UInputAction> RunAction;
 
 	TObjectPtr<ACharacterBase> CurrentCharacter;
+	TObjectPtr<ACameraCenterActor> CameraCenterActor;
 
 public:
+	void BeginPlay();
 	virtual void SetupInputComponent() override;
 
 protected:

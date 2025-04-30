@@ -6,8 +6,19 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "CharacterBase.h"
+#include "CameraCenterActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
+void ACharacterControllerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (CameraCenterActor)
+	{
+		SetViewTarget(CameraCenterActor);
+	}
+}
 void ACharacterControllerBase::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -42,6 +53,15 @@ void ACharacterControllerBase::OnPossess(APawn* InPawn)
 
 	this->CurrentCharacter = Cast<ACharacterBase>(InPawn);
 
+	TArray<AActor*> FoundActors;
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraCenterActor::StaticClass(), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		CameraCenterActor = Cast<ACameraCenterActor>(FoundActors[0]);
+	}
+
 	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputLocalPlayerSubsystem
 		= ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetLocalPlayer());
 
@@ -55,22 +75,32 @@ void ACharacterControllerBase::Move(const FInputActionValue& Value)
 {
 	const FVector2d MovementVector = Value.Get<FVector2D>();
 
-	const FRotator Rotation = this->GetControlRotation();
-	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator CameraRotation = CameraCenterActor->GetActorRotation();
+	const FRotator YawOnlyRotation(0.f, CameraRotation.Yaw, 0.f);
 
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector ForwardDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::Y);
 
-	this->CurrentCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
-	this->CurrentCharacter->AddMovementInput(RightDirection, MovementVector.X);
+	CurrentCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
+	CurrentCharacter->AddMovementInput(RightDirection, MovementVector.X);
+
+
+	FRotator CurrentRotation = CurrentCharacter->GetActorRotation();
+	CurrentCharacter->SetActorRotation(CurrentRotation);
+	
+	
 }
 
 void ACharacterControllerBase::Look(const FInputActionValue& Value)
 {
-	const FVector2d LookAxisVector = Value.Get<FVector2D>();
 
-	this->CurrentCharacter->AddControllerYawInput(LookAxisVector.X);
-	this->CurrentCharacter->AddControllerPitchInput(LookAxisVector.Y);
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	if (CameraCenterActor)
+	{
+		CameraCenterActor->TurnCamera(LookAxisVector.X);
+		CameraCenterActor->LookUpCamera(LookAxisVector.Y);
+	}
 }
 
 void ACharacterControllerBase::RunStart()
