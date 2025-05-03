@@ -30,8 +30,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> LookAction;
 
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> JumpAction;*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> ZoomAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> RunAction;
@@ -57,5 +57,11 @@ protected:
 	void RunStart();
 
 	void RunStop();
+
+	// ✅ 新增：Zoom 切換邏輯
+	void HandleZoom();
+
+	// ✅ 新增：Zoom 狀態（0=關卡視角，1=角色視角，2=角色ZoomIn）
+	int32 ZoomLevel = 0;
 
 };

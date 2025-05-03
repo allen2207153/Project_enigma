@@ -25,12 +25,34 @@ public:
     // カメラを上下に回転させる（Pitch）
     void LookUpCamera(float Value);
 
+    void SetCenterLocation(const FVector& NewLocation);
+
+    void SetOrbitRadius(float NewRadius);
+
+
+    // Getter：取得初始圓心位置與半徑（給 Controller 呼叫）
+    FVector GetDefaultCenterLocation() const { return DefaultCenterLocation; }
+    float GetDefaultOrbitRadius() const { return DefaultOrbitRadius; }
+
+    // 初期設定值（只供程式內部使用）
+    UPROPERTY()
+    FVector DefaultCenterLocation;
+
+    UPROPERTY()
+    float DefaultOrbitRadius;
+
+    void SetFollowTarget(AActor* Target);
+
+    void SetShouldFollowTarget(bool bFollow);
+
 protected:
     virtual void BeginPlay() override;
 
     // カメラの回転中心の位置
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit")
     FVector CenterLocation = FVector::ZeroVector;
+
+  
 
     // カメラの回転半径（スプリングアームの長さ）
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Orbit")
@@ -64,4 +86,9 @@ private:
     // 現在の上下角度（Pitch）
     UPROPERTY(VisibleAnywhere)
     float CurrentPitchAngle;
+
+    UPROPERTY()
+    AActor* FollowTarget = nullptr;
+
+    bool bShouldFollowTarget = false;
 };

@@ -25,11 +25,20 @@ ACameraCenterActor::ACameraCenterActor()
 void ACameraCenterActor::BeginPlay()
 {
     Super::BeginPlay();
+
+    // 備份當前（由編輯器設定的）初始狀態
+    DefaultCenterLocation = CenterLocation;
+    DefaultOrbitRadius = OrbitRadius;
 }
 
 void ACameraCenterActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (bShouldFollowTarget && FollowTarget)
+    {
+        CenterLocation = FollowTarget->GetActorLocation();
+    }
 
     // 弧度変換（Yaw 正常，Pitch 反転！）
     float YawRad = FMath::DegreesToRadians(CurrentYawAngle);
@@ -46,6 +55,8 @@ void ACameraCenterActor::Tick(float DeltaTime)
     // 中心を向く
     FRotator LookAt = (CenterLocation - CameraPosition).Rotation();
     SetActorRotation(LookAt);
+
+   
   
 }
 
@@ -63,4 +74,24 @@ void ACameraCenterActor::LookUpCamera(float Value)
     {
         CurrentPitchAngle = FMath::Clamp(CurrentPitchAngle + Value, MinPitch, MaxPitch);
     }
+}
+
+void ACameraCenterActor::SetCenterLocation(const FVector& NewLocation)
+{
+    CenterLocation = NewLocation;
+}
+
+void ACameraCenterActor::SetOrbitRadius(float NewRadius)
+{
+    OrbitRadius = FMath::Max(50.f, NewRadius); // 避免為 0 或負數
+}
+
+void ACameraCenterActor::SetFollowTarget(AActor* Target)
+{
+    FollowTarget = Target;
+}
+
+void ACameraCenterActor::SetShouldFollowTarget(bool bFollow)
+{
+    bShouldFollowTarget = bFollow;
 }

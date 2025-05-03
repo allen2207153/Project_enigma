@@ -43,6 +43,10 @@ void ACharacterControllerBase::SetupInputComponent()
 		EnhancedInputComponent->BindAction(RunAction.Get(),
 														ETriggerEvent::Completed,
 														this, &ACharacterControllerBase::RunStop);
+		//ZoomIn
+		EnhancedInputComponent->BindAction(ZoomAction.Get(),
+														ETriggerEvent::Started,
+														this, &ACharacterControllerBase::HandleZoom);
 
 	}
 }
@@ -112,4 +116,36 @@ void ACharacterControllerBase::RunStop()
 {
 	this->CurrentCharacter->GetCharacterMovement()->MaxWalkSpeed /= 2.0f;
 
+}
+
+void ACharacterControllerBase::HandleZoom()
+{
+	if (!CameraCenterActor || !CurrentCharacter) return;
+
+	ZoomLevel = (ZoomLevel + 1) % 3;
+
+	FString Msg = FString::Printf(TEXT("ZoomLevel = %d"), ZoomLevel);
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, Msg);
+	switch (ZoomLevel)
+	{
+	case 0:
+		CameraCenterActor->SetShouldFollowTarget(false);
+		CameraCenterActor->SetCenterLocation(CameraCenterActor->GetDefaultCenterLocation());
+		CameraCenterActor->SetOrbitRadius(CameraCenterActor->GetDefaultOrbitRadius());
+		break;
+
+	case 1:
+		CameraCenterActor->SetFollowTarget(CurrentCharacter); // 先指定
+		CameraCenterActor->SetShouldFollowTarget(true);     // 此階段不追蹤，只更新一次
+		CameraCenterActor->SetCenterLocation(CurrentCharacter->GetActorLocation());
+		CameraCenterActor->SetOrbitRadius(350.f);
+		break;
+
+	case 2:
+		CameraCenterActor->SetFollowTarget(CurrentCharacter);
+		CameraCenterActor->SetShouldFollowTarget(true);      // 啟用追蹤
+		CameraCenterActor->SetOrbitRadius(150.f);
+		// 不手動 SetCenterLocation，Tick 會自動更新
+		break;
+	}
 }
