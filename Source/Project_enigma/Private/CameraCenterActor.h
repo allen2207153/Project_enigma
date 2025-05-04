@@ -25,24 +25,31 @@ public:
     // カメラを上下に回転させる（Pitch）
     void LookUpCamera(float Value);
 
+    // 回転の中心位置を設定する
     void SetCenterLocation(const FVector& NewLocation);
 
+    // 回転の半径（カメラの距離）を設定する
     void SetOrbitRadius(float NewRadius);
 
 
-    // Getter：取得初始圓心位置與半徑（給 Controller 呼叫）
+    // 初期の中心位置を取得する
     FVector GetDefaultCenterLocation() const { return DefaultCenterLocation; }
+
+    // 初期の回転半径を取得する
     float GetDefaultOrbitRadius() const { return DefaultOrbitRadius; }
 
-    // 初期設定值（只供程式內部使用）
+    // デフォルトポジション
     UPROPERTY()
     FVector DefaultCenterLocation;
 
+    // デフォルト回転半径（SpringArmと同じ）
     UPROPERTY()
     float DefaultOrbitRadius;
 
+    // カメラが追従するターゲットを設定する
     void SetFollowTarget(AActor* Target);
 
+    // ターゲットを追従するかどうかを設定する
     void SetShouldFollowTarget(bool bFollow);
 
 protected:

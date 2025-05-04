@@ -135,17 +135,16 @@ void ACharacterControllerBase::HandleZoom()
 		break;
 
 	case 1:
-		CameraCenterActor->SetFollowTarget(CurrentCharacter); // 先指定
-		CameraCenterActor->SetShouldFollowTarget(true);     // 此階段不追蹤，只更新一次
+		CameraCenterActor->SetFollowTarget(CurrentCharacter); 
+		CameraCenterActor->SetShouldFollowTarget(true);
 		CameraCenterActor->SetCenterLocation(CurrentCharacter->GetActorLocation());
 		CameraCenterActor->SetOrbitRadius(350.f);
 		break;
 
 	case 2:
 		CameraCenterActor->SetFollowTarget(CurrentCharacter);
-		CameraCenterActor->SetShouldFollowTarget(true);      // 啟用追蹤
+		CameraCenterActor->SetShouldFollowTarget(true);
 		CameraCenterActor->SetOrbitRadius(150.f);
-		// 不手動 SetCenterLocation，Tick 會自動更新
 		break;
 	}
 }

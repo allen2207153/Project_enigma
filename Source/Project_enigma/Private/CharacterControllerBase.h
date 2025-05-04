@@ -58,10 +58,10 @@ protected:
 
 	void RunStop();
 
-	// ✅ 新增：Zoom 切換邏輯
+	
 	void HandleZoom();
 
-	// ✅ 新增：Zoom 狀態（0=關卡視角，1=角色視角，2=角色ZoomIn）
+	// Zoom 狀態（0=關卡視角，1=角色視角，2=角色ZoomIn）
 	int32 ZoomLevel = 0;
 
 };

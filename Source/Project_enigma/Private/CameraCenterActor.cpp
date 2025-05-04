@@ -26,7 +26,7 @@ void ACameraCenterActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 備份當前（由編輯器設定的）初始狀態
+    
     DefaultCenterLocation = CenterLocation;
     DefaultOrbitRadius = OrbitRadius;
 }
@@ -42,7 +42,7 @@ void ACameraCenterActor::Tick(float DeltaTime)
 
     // 弧度変換（Yaw 正常，Pitch 反転！）
     float YawRad = FMath::DegreesToRadians(CurrentYawAngle);
-    float PitchRad = FMath::DegreesToRadians(-CurrentPitchAngle);  // ★←反轉這裡！
+    float PitchRad = FMath::DegreesToRadians(-CurrentPitchAngle);  // 反転
 
     // 球面座標 → 座標系
     float X = CenterLocation.X + OrbitRadius * FMath::Cos(PitchRad) * FMath::Cos(YawRad);
@@ -83,7 +83,7 @@ void ACameraCenterActor::SetCenterLocation(const FVector& NewLocation)
 
 void ACameraCenterActor::SetOrbitRadius(float NewRadius)
 {
-    OrbitRadius = FMath::Max(50.f, NewRadius); // 避免為 0 或負數
+    OrbitRadius = FMath::Max(50.f, NewRadius);
 }
 
 void ACameraCenterActor::SetFollowTarget(AActor* Target)
