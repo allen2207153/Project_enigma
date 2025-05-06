@@ -23,4 +23,7 @@ AMainCharacter::AMainCharacter()
 	this->CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TWA CameraComponent"));
 	this->CameraComponent->SetupAttachment(this->CameraArmComponent.Get(), USpringArmComponent::SocketName);
 	this->CameraComponent->bUsePawnControlRotation = false;
+
+	this->InteractComponent = CreateDefaultSubobject<UInteractComponent>(TEXT("TWA InteractComponent"));
+
 }

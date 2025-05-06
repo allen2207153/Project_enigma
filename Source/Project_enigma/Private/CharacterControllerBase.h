@@ -36,8 +36,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> RunAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> InteractAction;
+
 	TObjectPtr<ACharacterBase> CurrentCharacter;
 	TObjectPtr<ACameraCenterActor> CameraCenterActor;
+
+
 
 public:
 	void BeginPlay();
@@ -60,6 +65,8 @@ protected:
 
 	
 	void HandleZoom();
+
+	void HandleInteract();
 
 	// Zoom 狀態（0=關卡視角，1=角色視角，2=角色ZoomIn）
 	int32 ZoomLevel = 0;

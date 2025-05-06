@@ -48,6 +48,11 @@ void ACharacterControllerBase::SetupInputComponent()
 														ETriggerEvent::Started,
 														this, &ACharacterControllerBase::HandleZoom);
 
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction.Get(),
+														ETriggerEvent::Started,
+														this, &ACharacterControllerBase::HandleInteract);
+
 	}
 }
 
@@ -146,5 +151,13 @@ void ACharacterControllerBase::HandleZoom()
 		CameraCenterActor->SetShouldFollowTarget(true);
 		CameraCenterActor->SetOrbitRadius(150.f);
 		break;
+	}
+}
+
+void ACharacterControllerBase::HandleInteract()
+{
+	if (CurrentCharacter && CurrentCharacter->GetInteractComponent())
+	{
+		CurrentCharacter->GetInteractComponent()->TryInteract();
 	}
 }
