@@ -36,65 +36,62 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-public:
 	virtual void Tick(float DeltaTime) override;
 
-	/** 玩家是否可以按鍵互動 */
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
 	bool bIsPlayerInteractable = false;
 
-	/** 是否自動執行（Tick中） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
 	bool bIsAutoExecute = false;
 
-	/** 類別分類 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
 	EObjectType ObjectType = EObjectType::None;
 
-	/** 玩家互動時執行 */
+	// === Interact Events ===
 	UFUNCTION(BlueprintNativeEvent, Category = "Object")
 	void OnInteract();
 	virtual void OnInteract_Implementation();
 
-	/** 自動執行邏輯（每隔一段時間） */
 	UFUNCTION(BlueprintNativeEvent, Category = "Object")
 	void OnAutoExecute();
 	virtual void OnAutoExecute_Implementation();
 
 protected:
-	/** 靜態網格（主體） */
+	// === 見た目・構造 ===
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Mesh;
 
-	/** 可選：動畫播放用骨架網格 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Visual")
 	USkeletalMeshComponent* SkeletalMesh = nullptr;
 
-	/** 自動旋轉角度（一次執行轉動量） */
-	UPROPERTY(EditAnywhere, Category = "AutoRotation")
-	FRotator RotationSpeed = FRotator(0.f, 90.f, 0.f);
-
-	/** 自動執行間隔（秒） */
-	UPROPERTY(EditAnywhere, Category = "AutoRotation")
-	float AutoExecuteInterval = 2.0f;
-
-	/** 音效（互動時播放） */
+	// === エフェクト・サウンド・アニメ ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
 	USoundBase* InteractSound = nullptr;
 
-	/** 粒子特效（Cascade） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
 	UParticleSystem* InteractEffect = nullptr;
 
-	/** 特效偏移位置 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
-	FVector EffectOffset = FVector::ZeroVector;
-
-	/** 動畫（互動時播放） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
 	UAnimationAsset* InteractAnimation = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object|Effect")
+	FVector EffectOffset = FVector::ZeroVector;
+
+	// === 自動滑らか回転 ===
+	UPROPERTY(EditAnywhere, Category = "AutoRotation")
+	FRotator RotationSpeed = FRotator(0.f, 90.f, 0.f);
+
+	UPROPERTY(EditAnywhere, Category = "AutoRotation")
+	float AutoExecuteInterval = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category = "SmoothRotation")
+	float RotationSpeedDegPerSec = 180.f;
+
 private:
 	FTimerHandle AutoExecuteTimerHandle;
+	bool bIsRotating = false;
+	FRotator TargetRotation;
+
+	void StartSmoothRotation();
 };
