@@ -19,32 +19,42 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
 	virtual void Tick(float DeltaTime) override;
+
 	virtual void OnInteract_Implementation() override;
 
-	/** 延遲摧毀自身 */
 	void DeferredDestroy();
 
 public:
-	/** 被移動的目標物件 */
+	// ===== 設定可能なプロパティ =====
+
+	/* 移動対象のアクター（例：足場など） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveTrigger")
 	AActor* TargetToMove = nullptr;
 
-	/** 移動偏移量（例：向上 100 cm） */
+	/* 移動のオフセット量（例：上方向に100cm） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveTrigger")
 	FVector MoveOffset = FVector(0, 0, 100);
 
-	/** 是否在互動後讓本體延遲消失 */
+	/* インタラクト後にこのトリガー自体を削除するか */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveTrigger")
 	bool bDestroyAfterInteract = true;
 
-	/** 緩慢移動速度（單位：cm/sec） */
+	/* 移動速度 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MoveTrigger")
 	float MoveSpeed = 300.f;
 
 private:
+	// ===== 内部制御用 =====
+
+	/* 削除用のタイマーハンドル */
 	FTimerHandle DestroyTimerHandle;
+
+	/* 現在移動中かどうかのフラグ */
 	bool bShouldMove = false;
+
+	/* 計算された目標座標 */
 	FVector MoveTargetLocation;
 };
 

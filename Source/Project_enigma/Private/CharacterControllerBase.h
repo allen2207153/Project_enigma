@@ -21,54 +21,75 @@ class ACharacterControllerBase : public APlayerController
 	GENERATED_BODY()
 	
 public:
+	// ========== 入力関連（Enhanced Input） ==========
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> CurrentMappingContext;
 
+	// 移動入力（スティック・WASD）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
 
+	// カメラ視点移動（右スティック・マウス）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> LookAction;
 
+	// ズーム切り替え（例：L2トリガー）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> ZoomAction;
 
+	// ダッシュ（例：Bボタン長押し）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> RunAction;
 
+	// インタラクト（例：Aボタン）
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> InteractAction;
 
+	// バーチャルカーソルON/OFF（例：L1トリガー）
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> ToggleCursorAction;
+
+
 	TObjectPtr<ACharacterBase> CurrentCharacter;
+
 	TObjectPtr<ACameraCenterActor> CameraCenterActor;
-
-
 
 public:
 	void BeginPlay();
+
 	virtual void SetupInputComponent() override;
 
 protected:
+	// キャラクター操作開始時（Possess）に呼ばれる
 	virtual void OnPossess(APawn* InPawn) override;
 
+	// ========== 入力アクションに対応する処理 ==========
+
+	// キャラクター移動
 	void Move(const FInputActionValue& Value);
 
+	// カメラ操作
 	void Look(const FInputActionValue& Value);
 
-	/*void JumpStart();
-
-	void JumpStop();*/
-
+	// ダッシュ開始
 	void RunStart();
 
+	// ダッシュ終了
 	void RunStop();
 
-	
+	// カメラズーム切替（3段階：遠→中→近）
 	void HandleZoom();
 
+	// インタラクト（調べる・拾う等）
 	void HandleInteract();
 
-	// Zoom 狀態（0=關卡視角，1=角色視角，2=角色ZoomIn）
-	int32 ZoomLevel = 0;
+	// カーソルを表示（L1押下時）
+	void HandleCursorPressed();
 
+	// カーソルを非表示（L1離した時）
+	void HandleCursorReleased();
+
+	// ズーム状態：0 = 遠距離 / 1 = 追従視点 / 2 = ZoomIn
+	int32 ZoomLevel = 0;
 };

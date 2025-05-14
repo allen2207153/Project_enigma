@@ -27,29 +27,43 @@ void UInteractComponent::BeginPlay()
 	
 }
 
+// ================================
+// 実際にインタラクト（調べる・拾う）を試みる処理
+// ================================
 void UInteractComponent::TryInteract()
 {
-    ACharacter* Player = Cast<ACharacter>(GetOwner());
-    if (!Player) return;
+	// プレイヤーキャラクターを取得
+	ACharacter* Player = Cast<ACharacter>(GetOwner());
+	if (!Player) return;
 
-    // 發射起點：角色中心位置（或 Mesh 的 Socket 也可以）
-    FVector Start = Player->GetActorLocation() + FVector(0, 0, 50); // 微調高度避免貼地
-    FVector Forward = Player->GetActorForwardVector();              // 面前方向
-    FVector End = Start + Forward * InteractDistance;
+	// --------- レイキャスト設定 ---------
+	// レイの発射位置（キャラの少し上あたり）
+	FVector Start = Player->GetActorLocation() + FVector(0, 0, 50);
 
-    FHitResult Hit;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(Player);
+	// 向いている方向（カメラではなく、キャラクターの前方向）
+	FVector Forward = Player->GetActorForwardVector();
 
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
-    {
-        AObjectBase* Target = Cast<AObjectBase>(Hit.GetActor());
-        if (Target && Target->bIsPlayerInteractable)
-        {
-            Target->OnInteract();
-        }
-    }
+	// レイの終点（インタラクト可能距離まで）
+	FVector End = Start + Forward * InteractDistance;
 
-    // Debug 線
-    DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 2.f);
+	// ヒット情報
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(Player); // 自分自身は無視
+
+	// --------- 可視チャネルでレイキャスト ---------
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	{
+		// インタラクト対象（ObjectBase派生かどうかチェック）
+		AObjectBase* Target = Cast<AObjectBase>(Hit.GetActor());
+
+		// インタラクト可能フラグがONなら実行
+		if (Target && Target->bIsPlayerInteractable)
+		{
+			Target->OnInteract();
+		}
+	}
+
+	// --------- デバッグ表示（緑線） ---------
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1.f, 0, 2.f);
 }

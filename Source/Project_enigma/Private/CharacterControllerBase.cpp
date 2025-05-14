@@ -10,60 +10,78 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+
+
 void ACharacterControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CameraCenterActor)
-	{
-		SetViewTarget(CameraCenterActor);
-	}
+	// カメラアクターが設定されていれば、ビューターゲットとして設定
+	SetViewTarget(CameraCenterActor);
+	
 }
+
 void ACharacterControllerBase::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
 	TObjectPtr<UEnhancedInputComponent> EnhancedInputComponent
-			= Cast<UEnhancedInputComponent>(this->InputComponent);
+		= Cast<UEnhancedInputComponent>(this->InputComponent);
 
 	if (EnhancedInputComponent)
 	{
-		//Move
+		// 移動入力
 		EnhancedInputComponent->BindAction(MoveAction.Get(),
-														ETriggerEvent::Triggered, 
-														this, &ACharacterControllerBase::Move);
-		//Look
+			ETriggerEvent::Triggered,
+			this, &ACharacterControllerBase::Move);
+
+		// 視点操作
 		EnhancedInputComponent->BindAction(LookAction.Get(),
-														ETriggerEvent::Triggered,
-														this, &ACharacterControllerBase::Look);
-		//Run
+			ETriggerEvent::Triggered,
+			this, &ACharacterControllerBase::Look);
+
+		// ダッシュ開始
 		EnhancedInputComponent->BindAction(RunAction.Get(),
-														ETriggerEvent::Started,
-														this, &ACharacterControllerBase::RunStart);
+			ETriggerEvent::Started,
+			this, &ACharacterControllerBase::RunStart);
+
+		// ダッシュ終了
 		EnhancedInputComponent->BindAction(RunAction.Get(),
-														ETriggerEvent::Completed,
-														this, &ACharacterControllerBase::RunStop);
-		//ZoomIn
+			ETriggerEvent::Completed,
+			this, &ACharacterControllerBase::RunStop);
+
+		// ズーム切り替え
 		EnhancedInputComponent->BindAction(ZoomAction.Get(),
-														ETriggerEvent::Started,
-														this, &ACharacterControllerBase::HandleZoom);
+			ETriggerEvent::Started,
+			this, &ACharacterControllerBase::HandleZoom);
 
-		// Interact
+		// インタラクト実行（ボタンでオブジェクトを操作）
 		EnhancedInputComponent->BindAction(InteractAction.Get(),
-														ETriggerEvent::Started,
-														this, &ACharacterControllerBase::HandleInteract);
+			ETriggerEvent::Started,
+			this, &ACharacterControllerBase::HandleInteract);
 
+		// バーチャルカーソル有効化
+		EnhancedInputComponent->BindAction(ToggleCursorAction.Get(),
+			ETriggerEvent::Started,
+			this, &ACharacterControllerBase::HandleCursorPressed);
+
+		// バーチャルカーソル無効化
+		EnhancedInputComponent->BindAction(ToggleCursorAction.Get(),
+			ETriggerEvent::Completed,
+			this, &ACharacterControllerBase::HandleCursorReleased);
 	}
 }
 
+// ========== キャラクターを操作する際の初期化 ==========
 void ACharacterControllerBase::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	// 自身が操作するキャラクター取得
 	this->CurrentCharacter = Cast<ACharacterBase>(InPawn);
 
+	// カメラアクターを検索（レベル内にある最初のものを使用）
 	TArray<AActor*> FoundActors;
-
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraCenterActor::StaticClass(), FoundActors);
 
 	if (FoundActors.Num() > 0)
@@ -71,37 +89,42 @@ void ACharacterControllerBase::OnPossess(APawn* InPawn)
 		CameraCenterActor = Cast<ACameraCenterActor>(FoundActors[0]);
 	}
 
+	// 入力マッピングを登録（Enhanced Input）
 	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputLocalPlayerSubsystem
 		= ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetLocalPlayer());
 
-	if (InputLocalPlayerSubsystem)
-	{
-		InputLocalPlayerSubsystem->AddMappingContext(this->CurrentMappingContext.Get(), 0);
-	}
+	InputLocalPlayerSubsystem->AddMappingContext(this->CurrentMappingContext.Get(), 0);
 }
 
+// ========== 移動処理（前後・左右） ==========
 void ACharacterControllerBase::Move(const FInputActionValue& Value)
 {
 	const FVector2d MovementVector = Value.Get<FVector2D>();
 
+	// カメラの Yaw に合わせて移動方向を計算
 	const FRotator CameraRotation = CameraCenterActor->GetActorRotation();
 	const FRotator YawOnlyRotation(0.f, CameraRotation.Yaw, 0.f);
 
 	const FVector ForwardDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::Y);
 
+	// 入力ベクトルに応じてキャラクターを移動
 	CurrentCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
 	CurrentCharacter->AddMovementInput(RightDirection, MovementVector.X);
 
-
+	// ※ 現時点ではキャラの向きを固定（追従回転しない）
 	FRotator CurrentRotation = CurrentCharacter->GetActorRotation();
 	CurrentCharacter->SetActorRotation(CurrentRotation);
-	
-	
 }
 
+// ========== カメラ操作==========
 void ACharacterControllerBase::Look(const FInputActionValue& Value)
 {
+	// カーソル有効中はカメラ操作しない
+	if (CurrentCharacter->GetVirtualCursorComponent()->bCursorEnabled)
+	{
+		return;
+	}
 
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -112,52 +135,94 @@ void ACharacterControllerBase::Look(const FInputActionValue& Value)
 	}
 }
 
+// ========== ダッシュ開始==========
 void ACharacterControllerBase::RunStart()
 {
 	this->CurrentCharacter->GetCharacterMovement()->MaxWalkSpeed *= 2.0f;
 }
 
+// ========== ダッシュ終了 ==========
 void ACharacterControllerBase::RunStop()
 {
 	this->CurrentCharacter->GetCharacterMovement()->MaxWalkSpeed /= 2.0f;
-
 }
 
+// ========== カメラのズーム切り替え（3段階） ==========
 void ACharacterControllerBase::HandleZoom()
 {
 	if (!CameraCenterActor || !CurrentCharacter) return;
 
+	// ズームレベル 0→1→2→0 に循環
 	ZoomLevel = (ZoomLevel + 1) % 3;
 
+	// デバッグ表示
 	FString Msg = FString::Printf(TEXT("ZoomLevel = %d"), ZoomLevel);
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, Msg);
+
 	switch (ZoomLevel)
 	{
-	case 0:
+	case 0: // 遠距離・固定視点
 		CameraCenterActor->SetShouldFollowTarget(false);
-		CameraCenterActor->SetCenterLocation(CameraCenterActor->GetDefaultCenterLocation());
-		CameraCenterActor->SetOrbitRadius(CameraCenterActor->GetDefaultOrbitRadius());
+		CameraCenterActor->SetTargetCenterLocation(CameraCenterActor->GetDefaultCenterLocation());
+		CameraCenterActor->SetTargetOrbitRadius(CameraCenterActor->GetDefaultOrbitRadius());
 		break;
 
-	case 1:
-		CameraCenterActor->SetFollowTarget(CurrentCharacter); 
-		CameraCenterActor->SetShouldFollowTarget(true);
-		CameraCenterActor->SetCenterLocation(CurrentCharacter->GetActorLocation());
-		CameraCenterActor->SetOrbitRadius(350.f);
-		break;
-
-	case 2:
+	case 1: // 追従・中距離視点
 		CameraCenterActor->SetFollowTarget(CurrentCharacter);
 		CameraCenterActor->SetShouldFollowTarget(true);
-		CameraCenterActor->SetOrbitRadius(150.f);
+		CameraCenterActor->SetTargetOrbitRadius(350.f);
+		break;
+
+	case 2: // 追従・近距離
+		CameraCenterActor->SetTargetOrbitRadius(150.f);
 		break;
 	}
 }
 
+// ========== インタラクト入力：目の前のオブジェクトを調べる・拾うなど ==========
 void ACharacterControllerBase::HandleInteract()
 {
-	if (CurrentCharacter && CurrentCharacter->GetInteractComponent())
+	auto* CursorComponent = CurrentCharacter->GetVirtualCursorComponent();
+	if (CursorComponent->bCursorEnabled)
+	{
+		CursorComponent->TryInteractWithCursor();
+	}
+	else
 	{
 		CurrentCharacter->GetInteractComponent()->TryInteract();
+	}
+}
+
+// ========== カーソルを有効化（ボタン押し） ==========
+void ACharacterControllerBase::HandleCursorPressed()
+{
+	UE_LOG(LogTemp, Warning, TEXT("L1 pressed: HandleCursorPressed() called"));
+
+	if (!CurrentCharacter)
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ CurrentCharacter is NULL"));
+		return;
+	}
+
+	auto* CursorComponent = CurrentCharacter->GetVirtualCursorComponent();
+	if (!CursorComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("❌ VirtualCursorComponent is NULL"));
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("✅ Calling EnableCursor()"));
+	CursorComponent->EnableCursor();
+}
+
+// ========== カーソルを無効化（ボタン離す） ==========
+void ACharacterControllerBase::HandleCursorReleased()
+{
+	if (!CurrentCharacter) return;
+
+	auto* CursorComponent = CurrentCharacter->GetVirtualCursorComponent();
+	if (CursorComponent)
+	{
+		CursorComponent->DisableCursor();
 	}
 }

@@ -7,24 +7,24 @@
 #include "InteractComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UInteractComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
+	// コンストラクタ：デフォルト値の設定など
 	UInteractComponent();
 
 protected:
-    virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 public:
-    /** 射線距離 */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interact")
-    float InteractDistance = 200.f;
+	/* インタラクト可能な最大距離*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interact")
+	float InteractDistance = 200.f;
 
-    /** 執行互動 */
-    UFUNCTION(BlueprintCallable, Category = "Interact")
-    void TryInteract();
+	/* インタラクト実行処理 */
+	UFUNCTION(BlueprintCallable, Category = "Interact")
+	void TryInteract();
 };
