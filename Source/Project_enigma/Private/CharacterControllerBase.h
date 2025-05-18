@@ -70,7 +70,14 @@ public:
 	// Timer 用 Handle（管理器）
 	FTimerHandle TimerHandle_UpdateTime;
 
-	// 每秒呼ばれる関数（UI を更新する）
+	// 崖の落下チェック距離（前方）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EdgeGuard")
+	float GroundForwardCheckDistance = 50.0f;
+
+	// 崖の落下チェック距離（下方向）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EdgeGuard")
+	float GroundDownCheckDistance = 5000.0f;
+
 	UFUNCTION()
 	void UpdateUITime();
 
@@ -111,4 +118,9 @@ protected:
 
 	// ズーム状態：0 = 遠距離 / 1 = 追従視点 / 2 = ZoomIn
 	int32 ZoomLevel = 0;
+
+	// ========== 落下防止(地面チェック） ==========
+
+	/** 指定方向に地面があるかチェックして安全か判定 */
+	bool IsSafeToMoveInDirection(const FVector& Direction);
 };

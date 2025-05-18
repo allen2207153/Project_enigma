@@ -129,6 +129,7 @@ void ACharacterControllerBase::OnPossess(APawn* InPawn)
 void ACharacterControllerBase::Move(const FInputActionValue& Value)
 {
 	const FVector2d MovementVector = Value.Get<FVector2D>();
+	if (!CurrentCharacter || MovementVector.IsNearlyZero()) return;
 
 	// カメラの Yaw に合わせて移動方向を計算
 	const FRotator CameraRotation = CameraCenterActor->GetActorRotation();
@@ -137,11 +138,18 @@ void ACharacterControllerBase::Move(const FInputActionValue& Value)
 	const FVector ForwardDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawOnlyRotation).GetUnitAxis(EAxis::Y);
 
+	// ✅ 前方に地面があるかチェック（崖ガード）
+	if (!IsSafeToMoveInDirection(ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X))
+	{
+		// UE_LOG(LogTemp, Warning, TEXT("⛔ 足元に地面なし。進行ブロック"));
+		return;
+	}
+
 	// 入力ベクトルに応じてキャラクターを移動
 	CurrentCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
 	CurrentCharacter->AddMovementInput(RightDirection, MovementVector.X);
 
-	// ※ 現時点ではキャラの向きを固定（追従回転しない）
+	// 向きは固定
 	FRotator CurrentRotation = CurrentCharacter->GetActorRotation();
 	CurrentCharacter->SetActorRotation(CurrentRotation);
 }
@@ -264,4 +272,25 @@ void ACharacterControllerBase::UpdateUITime()
 	{
 		LevelUIInstance->SetTime(ElapsedSeconds);
 	}
+}
+
+bool ACharacterControllerBase::IsSafeToMoveInDirection(const FVector& Direction)
+{
+	if (!CurrentCharacter) return true;
+
+	
+	const FVector Start = CurrentCharacter->GetActorLocation() + Direction.GetSafeNormal() * GroundForwardCheckDistance;
+	const FVector End = Start - FVector(0, 0, GroundDownCheckDistance);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(CurrentCharacter);
+
+	bool bHitGround = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+
+#if WITH_EDITOR
+	DrawDebugLine(GetWorld(), Start, End, bHitGround ? FColor::Green : FColor::Red, false, 0.2f);
+#endif
+
+	return bHitGround;
 }

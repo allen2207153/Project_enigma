@@ -36,4 +36,7 @@ AMainCharacter::AMainCharacter()
 
 	// ========== バーチャルカーソル制御用コンポーネント ==========
 	this->VirtualCursorComponent = CreateDefaultSubobject<UVirtualCursorComponent>(TEXT("TWA VirtualCursorComponent"));
+
+	// ========== エッジガード制御用コンポーネント ==========
+	//this->EdgeGuardComponent = CreateDefaultSubobject<UEdgeGuardComponent>(TEXT("TWA EdgeGuardComponent"));
 }

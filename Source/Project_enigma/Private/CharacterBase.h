@@ -1,21 +1,31 @@
-#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InteractComponent.h"
 #include "VirtualCursorComponent.h"
+//#include "EdgeGuardComponent.h"
+
 #include "CharacterBase.generated.h"
+
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInteractComponent;
 class UVirtualCursorComponent;
+class UEdgeGuardComponent;
+
+
+
 
 UCLASS(Abstract, NotBlueprintable)
-class ACharacterBase : public ACharacter{
+class ACharacterBase : public ACharacter
+{
 	GENERATED_BODY()
 
+
+
 protected:
+
 	// ========== カメラ関連 ==========
 
 	// カメラのアーム（キャラクターとの距離を調整）
@@ -37,6 +47,10 @@ protected:
 	// バーチャルカーソル制御用のコンポーネント
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TWA_Cursor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UVirtualCursorComponent> VirtualCursorComponent;
+
+	////ステージ外への落下防止（エッジガード）
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TWA_EdgeGuard", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<UEdgeGuardComponent> EdgeGuardComponent;
 
 public:
 	ACharacterBase();
