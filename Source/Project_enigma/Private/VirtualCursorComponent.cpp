@@ -179,15 +179,19 @@ void UVirtualCursorComponent::TryInteractWithCursor()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("🎯 命中：%s"), *Hit.GetActor()->GetName());
 
-			if (Hit.GetActor()->ActorHasTag("Movable"))
+			// 如果是 ObjectBase，就呼叫互動方法
+			if (AObjectBase* Interactable = Cast<AObjectBase>(Hit.GetActor()))
 			{
-				Hit.GetActor()->AddActorWorldOffset(FVector(0, 0, 50));
-				UE_LOG(LogTemp, Log, TEXT("🟢 移動成功：%s"), *Hit.GetActor()->GetName());
+				if (Interactable->bIsPlayerInteractable && Interactable->IsWidgetOnlyObject())
+				{
+					Interactable->OnInteract();
+					UE_LOG(LogTemp, Log, TEXT("✅ ObjectBase interacted via virtual cursor."));
+				}
 			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("❌ 未命中"));
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("⚠️ 命中對象不是 ObjectBase，忽略互動。"));
+			}
 		}
 	}
 }

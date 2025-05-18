@@ -9,6 +9,7 @@
 #include "CameraCenterActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "WBP_LevelUIBase.h"
 
 
 
@@ -16,8 +17,36 @@ void ACharacterControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// カメラアクターが設定されていれば、ビューターゲットとして設定
+	// （可選）設定攝影機目標
 	SetViewTarget(CameraCenterActor);
+
+	// ✅ UI 呼叫邏輯（保證在 GameThread）
+	if (LevelUIClass)
+	{
+		AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				LevelUIInstance = CreateWidget<UWBP_LevelUIBase>(this, LevelUIClass);
+				if (LevelUIInstance)
+				{
+					LevelUIInstance->AddToViewport();
+					LevelUIInstance->SetDiamondCount(0);
+					LevelUIInstance->SetCoinCount(0);
+					LevelUIInstance->SetTime(0);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("❌ UI creation failed"));
+				}
+			});
+	}
+
+	GetWorldTimerManager().SetTimer(
+		TimerHandle_UpdateTime,
+		this,
+		&ACharacterControllerBase::UpdateUITime,
+		1.0f,
+		true
+	);
 	
 }
 
@@ -224,5 +253,15 @@ void ACharacterControllerBase::HandleCursorReleased()
 	if (CursorComponent)
 	{
 		CursorComponent->DisableCursor();
+	}
+}
+
+void ACharacterControllerBase::UpdateUITime()
+{
+	ElapsedSeconds++;
+
+	if (LevelUIInstance)
+	{
+		LevelUIInstance->SetTime(ElapsedSeconds);
 	}
 }

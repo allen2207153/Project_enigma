@@ -44,6 +44,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
 	bool bIsPlayerInteractable = false;
 
+	/** UI Widget からのみ操作される対象か（バーチャルカーソル連携など） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
+	bool bOnlyUsableFromWidget = false;
+
+	/** このオブジェクトは UI Widget 専用かどうか（C++ や Blueprint で利用可能） */
+	UFUNCTION(BlueprintCallable, Category = "Object")
+	bool IsWidgetOnlyObject() const;
+
 	/** 自動処理を開始するか（BeginPlay 時に起動） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object")
 	bool bIsAutoExecute = false;

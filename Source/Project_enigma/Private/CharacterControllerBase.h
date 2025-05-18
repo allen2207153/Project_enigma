@@ -12,15 +12,23 @@ class ACharacterBase;
 class ACameraCenterActor;
 struct FInputActionValue;
 
-/**
- * 
- */
+class UWBP_LevelUIBase;
+
+
 UCLASS()
 class ACharacterControllerBase : public APlayerController
 {
 	GENERATED_BODY()
 	
 public:
+	// ========== UI関連 ==========
+	// UI (BP編集)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UWBP_LevelUIBase> LevelUIClass;
+
+	
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWBP_LevelUIBase> LevelUIInstance;
 	// ========== 入力関連（Enhanced Input） ==========
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TWA_Input", meta = (AllowPrivateAccess = "true"))
@@ -54,6 +62,17 @@ public:
 	TObjectPtr<ACharacterBase> CurrentCharacter;
 
 	TObjectPtr<ACameraCenterActor> CameraCenterActor;
+
+	// 時間計時（秒）
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	int32 ElapsedSeconds = 0;
+
+	// Timer 用 Handle（管理器）
+	FTimerHandle TimerHandle_UpdateTime;
+
+	// 每秒呼ばれる関数（UI を更新する）
+	UFUNCTION()
+	void UpdateUITime();
 
 public:
 	void BeginPlay();

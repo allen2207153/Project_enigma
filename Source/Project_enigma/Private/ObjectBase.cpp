@@ -24,6 +24,9 @@ AObjectBase::AObjectBase()
 	RotationSpeed = FRotator(0.f, 90.f, 0.f);      // 回転量（1回あたり）
 	AutoExecuteInterval = 2.0f;                    // 自動実行の間隔（秒）
 	RotationSpeedDegPerSec = 180.f;                // 回転スピード（角度/秒）
+
+	bIsPlayerInteractable = false;
+	bOnlyUsableFromWidget = false;
 }
 
 // ===============================
@@ -83,6 +86,9 @@ void AObjectBase::Tick(float DeltaTime)
 // ===============================
 void AObjectBase::OnInteract_Implementation()
 {
+	// デバッグログ（任意）
+	UE_LOG(LogTemp, Log, TEXT("🔹 Object Interacted: %s"), *GetName());
+
 	// サウンド再生
 	if (InteractSound)
 	{
@@ -121,4 +127,12 @@ void AObjectBase::StartSmoothRotation()
 	// 回転目標を現在の角度＋RotationSpeedに設定
 	TargetRotation = GetActorRotation() + RotationSpeed;
 	bIsRotating = true;
+}
+
+// ===============================
+// UI Widget 用の専用判定関数
+// ===============================
+bool AObjectBase::IsWidgetOnlyObject() const
+{
+	return bOnlyUsableFromWidget;
 }
