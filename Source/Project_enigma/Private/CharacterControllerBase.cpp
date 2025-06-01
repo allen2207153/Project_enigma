@@ -9,45 +9,42 @@
 #include "CameraCenterActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameMode_LevelBase.h"
 #include "WBP_LevelUIBase.h"
-
 
 
 void ACharacterControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// （可選）設定攝影機目標
 	SetViewTarget(CameraCenterActor);
 
-	// ✅ UI 呼叫邏輯（保證在 GameThread）
+	// ✅ 直接同步建立 UI，不用 AsyncTask
 	if (LevelUIClass)
 	{
-		AsyncTask(ENamedThreads::GameThread, [this]()
-			{
-				LevelUIInstance = CreateWidget<UWBP_LevelUIBase>(this, LevelUIClass);
-				if (LevelUIInstance)
-				{
-					LevelUIInstance->AddToViewport();
-					LevelUIInstance->SetDiamondCount(0);
-					LevelUIInstance->SetCoinCount(0);
-					LevelUIInstance->SetTime(0);
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("❌ UI creation failed"));
-				}
-			});
+		LevelUIInstance = CreateWidget<UWBP_LevelUIBase>(this, LevelUIClass);
+		if (LevelUIInstance)
+		{
+			LevelUIInstance->AddToViewport();
+			LevelUIInstance->SetDiamondCount(0);
+			LevelUIInstance->SetCoinCount(0);
+			LevelUIInstance->SetTime(0);
+			UE_LOG(LogTemp, Warning, TEXT("🟢 UI Created Successfully"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("❌ UI creation failed"));
+		}
 	}
 
+	// ✅ 開始每秒更新 UI
 	GetWorldTimerManager().SetTimer(
 		TimerHandle_UpdateTime,
 		this,
-		&ACharacterControllerBase::UpdateUITime,
+		&ACharacterControllerBase::UpdateLevelUI,
 		1.0f,
 		true
 	);
-	
 }
 
 void ACharacterControllerBase::SetupInputComponent()
@@ -264,13 +261,23 @@ void ACharacterControllerBase::HandleCursorReleased()
 	}
 }
 
-void ACharacterControllerBase::UpdateUITime()
+void ACharacterControllerBase::UpdateLevelUI()
 {
-	ElapsedSeconds++;
+	UE_LOG(LogTemp, Warning, TEXT("🟢 UpdateLevelUI() called"));
 
-	if (LevelUIInstance)
+	auto* GM = Cast<AGameMode_LevelBase>(UGameplayStatics::GetGameMode(this));
+	if (LevelUIInstance && GM)
 	{
-		LevelUIInstance->SetTime(ElapsedSeconds);
+		LevelUIInstance->SetTime(GM->GetElapsedTime());
+		LevelUIInstance->SetCoinCount(GM->GetCoins());
+		LevelUIInstance->SetDiamondCount(GM->GetDiamonds());
+	}
+	else
+	{
+		if (!LevelUIInstance)
+			UE_LOG(LogTemp, Error, TEXT("❌ LevelUIInstance is NULL"));
+		if (!GM)
+			UE_LOG(LogTemp, Error, TEXT("❌ GameMode is NULL"));
 	}
 }
 

@@ -79,7 +79,7 @@ public:
 	float GroundDownCheckDistance = 5000.0f;
 
 	UFUNCTION()
-	void UpdateUITime();
+	void UpdateLevelUI();
 
 public:
 	void BeginPlay();

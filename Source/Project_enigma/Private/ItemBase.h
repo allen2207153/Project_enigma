@@ -10,11 +10,11 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-    EIT_Crystal     UMETA(DisplayName = "Crystal"),
-    EIT_Key         UMETA(DisplayName = "Key"),
-    EIT_Coin        UMETA(DisplayName = "Coin"),
-    EIT_Crown       UMETA(DisplayName = "Crown"),
-    EIT_Trigger     UMETA(DisplayName = "Trigger")
+    E_Crystal     UMETA(DisplayName = "Crystal"),
+    E_Key         UMETA(DisplayName = "Key"),
+    E_Coin        UMETA(DisplayName = "Coin"),
+    E_Crown       UMETA(DisplayName = "Crown"),
+    E_Trigger     UMETA(DisplayName = "Trigger")
 };
 //アイテムを取ったときのイベント
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnItemCollected);
@@ -47,58 +47,44 @@ public:
     virtual void OnCollected(AActor* Collector);
 
 private:
-    void StartShrinkAndDestroy();    // 小さくなって消える
-    void UpdateShrink(float DeltaTime); // 毎フレームの縮小処理
+    void StartShrinkAndDestroy();         // 小さくなって消える
+    void UpdateShrink(float DeltaTime);   // 毎フレームの縮小処理
 
 public:
-    // アイテムの見た目（Mesh）
+    // 🔸構成部品
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
     UStaticMeshComponent* Mesh;
 
-    // アイテムを取る判定用の球
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
     class USphereComponent* InteractionSphere;
 
-    // アイテムの種類（ダイヤ／カギなど）
+    // 🔸基本設定
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     EItemType ItemType;
 
-    // プレイヤーがぶつかったら自動で取るかどうか
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     bool bCollectOnOverlap = true;
 
-    // 物理衝突を有効にするか
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
     bool bEnableCollision = false;
 
-    // アイテムを取った時に流す音
+    // 🔸視覚・効果
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effect")
     USoundBase* PickupSound;
 
-    // ゆっくり回るスピード（見た目）
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Visual")
     float RotationSpeed = 180.f;
 
-    // もう取られたかどうか
+    // 🔸状態
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item")
     bool bCollected = false;
 
-    // ブループリントイベント：取られた時に呼ばれる
+    // 🔸ブループリント通知
     UPROPERTY(BlueprintAssignable, Category = "Item")
     FOnItemCollected OnItemCollected;
 
-    // 🔸現在の収集数（UI 表示用）
-
-    // ダイヤ（Crystal）の数
-    UPROPERTY(BlueprintReadOnly, Category = "Item|UI")
-    int32 CollectedCrystalCount = 0;
-
-    // コイン（Coin）の数
-    UPROPERTY(BlueprintReadOnly, Category = "Item|UI")
-    int32 CollectedCoinCount = 0;
-
 private:
-    // 縮小処理用の変数
+    // 縮小処理用
     bool bIsShrinking = false;
     float ShrinkDuration = 0.3f;
     float ShrinkElapsedTime = 0.f;

@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include <Components/CanvasPanel.h>
 #include <Components/Image.h>
 #include "Blueprint/UserWidget.h"
 #include <Components/TextBlock.h>
@@ -16,17 +16,45 @@ class UWBP_LevelUIBase : public UUserWidget{
 	
 
 public:
-	// 設定鑽石數量
+	// ========== UI Root Panels ==========
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* InGameUIRoot;
+
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* ResultRoot;
+
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* GameOverRoot;
+
+	// ========== 結算數據用 ==========
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ResultCoinText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ResultTimeText;
+
+	// ========== 函数 ==========
 	UFUNCTION(BlueprintCallable)
+	void ShowResultScreen();
+
+	UFUNCTION(BlueprintCallable)
+	void HideResultScreen();
+
+	UFUNCTION(BlueprintCallable)
+	void ShowGameOverScreen();
+
+	UFUNCTION(BlueprintCallable)
+	void HideGameOverScreen();
+
+	void NativeConstruct();
+
 	void SetDiamondCount(int32 Count);
 
-	// 設定硬幣數量
-	UFUNCTION(BlueprintCallable)
 	void SetCoinCount(int32 CoinCount);
 
-	// 設定時間（秒）
-	UFUNCTION(BlueprintCallable)
-	void SetTime(int32 Seconds);
+	void SetTime(float Seconds);
+
+	void SetResultData(int32 InCoins, int32 InDiamonds, float InElapsedTime);
 
 protected:
 	// 綁定三顆鑽石
@@ -53,4 +81,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UTexture2D* DiamondActive;
+
+private:
+	// 保存的數據（UI 內部用）
+	int32 Coins = 0;
+	int32 Diamonds = 0;
+	float ElapsedTime = 0.0f;
 };
