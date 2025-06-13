@@ -19,17 +19,23 @@ void AGameMode_LevelBase::OnLevelClear()
 {
     if (bGameEnded) return;
     bGameEnded = true;
+   
 
     APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-    if (PC)
-    {
-        ACharacterControllerBase* MyController = Cast<ACharacterControllerBase>(PC);
+    PC->SetIgnoreMoveInput(true);
+    PC->SetIgnoreLookInput(true);
+
+	 ACharacterControllerBase* MyController = Cast<ACharacterControllerBase>(PC);
         if (MyController && MyController->LevelUIInstance)
         {
             MyController->LevelUIInstance->SetResultData(CoinsCollected, DiamondsCollected, GetElapsedTime());
             MyController->LevelUIInstance->ShowResultScreen();
+
+           
+            PC->SetShowMouseCursor(false);
+
         }
-    }
+    
 }
 
 void AGameMode_LevelBase::OnGameOver()

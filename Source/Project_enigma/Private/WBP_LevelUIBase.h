@@ -33,6 +33,18 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ResultTimeText;
 
+	/** 再挑戦ボタン（ステージをリスタート）*/
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	class UButton* ReplayButton;
+
+	/** 次のステージへ（仮機能、未実装でもOK）*/
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	class UButton* NextStageButton;
+
+	/** メインメニューに戻る（仮機能、未実装でもOK）*/
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	class UButton* ReturnToMenuButton;
+
 	// ========== 函数 ==========
 	UFUNCTION(BlueprintCallable)
 	void ShowResultScreen();
@@ -54,10 +66,32 @@ public:
 
 	void SetTime(float Seconds);
 
+	void SetResultDiamondCount(int32 Count);
+
 	void SetResultData(int32 InCoins, int32 InDiamonds, float InElapsedTime);
 
+
+	// ===== ボタン処理設定 =====
+	void SetupButtonEvents();
+
+	UFUNCTION(BlueprintCallable)
+	void OnReplayButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnNextStageButtonClicked();
+
+	UFUNCTION(BlueprintCallable)
+	void OnReturnToMenuButtonClicked();
+
+	/** 次のステージのレベル名（Blueprint で設定可） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+	FName NextStageLevelName;
+
+	/** タイトル画面のレベル名（Blueprint で設定可） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level")
+	FName TitleScreenLevelName;
 protected:
-	// 綁定三顆鑽石
+	// ダイヤ画像
 	UPROPERTY(meta = (BindWidget))
 	UImage* Diamond_0;
 
@@ -67,11 +101,21 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UImage* Diamond_2;
 
-	// 硬幣數量
+	// 結果畫面用のダイヤ画像
+	UPROPERTY(meta = (BindWidget))
+	UImage* ResultDiamond_0;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* ResultDiamond_1;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* ResultDiamond_2;
+
+	// コイン数
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CoinText;
 
-	// 計時器
+	// タイムカウント
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* TimerText;
 
@@ -81,6 +125,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UTexture2D* DiamondActive;
+
+
+	
 
 private:
 	// 保存的數據（UI 內部用）

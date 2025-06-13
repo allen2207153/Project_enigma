@@ -37,14 +37,14 @@ void ACharacterControllerBase::BeginPlay()
 		}
 	}
 
-	// ✅ 開始每秒更新 UI
 	GetWorldTimerManager().SetTimer(
 		TimerHandle_UpdateTime,
 		this,
 		&ACharacterControllerBase::UpdateLevelUI,
-		1.0f,
+		0.2f,
 		true
 	);
+
 }
 
 void ACharacterControllerBase::SetupInputComponent()
