@@ -53,6 +53,19 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    // ========== 初期設定パラメータ（Blueprintから指定可能） ==========
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Initial")
+    FVector InitialCenterLocation = FVector::ZeroVector;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Initial")
+    float InitialYaw = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Initial")
+    float InitialPitch = -45.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Initial")
+    float InitialOrbitRadius = 500.f;
+
     // ==== カメラ回転の基準座標・距離 ====
 
     // 現在のカメラ中心座標

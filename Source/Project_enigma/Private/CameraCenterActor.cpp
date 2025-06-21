@@ -16,23 +16,25 @@ ACameraCenterActor::ACameraCenterActor()
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;    // カメラは自分で回転制御
 
-    // 初期値設定
-    CenterLocation = FVector::ZeroVector;
-    CurrentYawAngle = 0.f;
-    CurrentPitchAngle = -45.f;
+   
 }
 
 void ACameraCenterActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    // デフォルト状態を保存（リセット時に使用可能）
+    // Blueprintで設定された初期値を反映
+    CenterLocation = InitialCenterLocation;
+    TargetCenterLocation = InitialCenterLocation;
+
+    CurrentYawAngle = InitialYaw;
+    CurrentPitchAngle = FMath::Clamp(InitialPitch, MinPitch, MaxPitch);
+
+    OrbitRadius = FMath::Max(50.f, InitialOrbitRadius);  // 最小距離制限
+    TargetOrbitRadius = OrbitRadius;
+
     DefaultCenterLocation = CenterLocation;
     DefaultOrbitRadius = OrbitRadius;
-
-    // 初期ターゲット値設定（カメラ移動の滑らか補間に使用）
-    TargetCenterLocation = CenterLocation;
-    TargetOrbitRadius = OrbitRadius;
 }
 
 void ACameraCenterActor::Tick(float DeltaTime)

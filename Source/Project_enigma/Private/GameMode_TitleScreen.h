@@ -17,11 +17,10 @@ class AGameMode_TitleScreen : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
-	// WBP_TitleScreen の Blueprint クラスを設定可能にする
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
-	TSubclassOf<UWBP_TitleScreen> TitleWidgetClass;
 
-	// 実際のウィジェットインスタンス
-	UPROPERTY()
-	UWBP_TitleScreen* TitleWidget;
+	// 🔸Blueprintで設定できるカメラ参照
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<ACameraActor> DefaultCameraActor;
+
+
 };
